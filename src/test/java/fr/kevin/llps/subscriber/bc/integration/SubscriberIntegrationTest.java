@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class SubscriberIntegrationTest extends PostgreSQLContainerTest {
 
-    @Value("classpath:/json/subscriber-request.json")
+    @Value("classpath:/json/subscriber-request-ok.json")
     private Resource subscriberRequest;
 
     @Autowired

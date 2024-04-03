@@ -6,6 +6,7 @@ import fr.kevin.llps.subscriber.bc.api.rest.mapper.SubscriberDtoMapper;
 import fr.kevin.llps.subscriber.bc.api.rest.mapper.SubscriberEntityMapper;
 import fr.kevin.llps.subscriber.bc.service.SubscriberService;
 import fr.kevin.llps.subscriber.bc.domain.SubscriberEntity;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,7 +23,7 @@ public class SubscriberController {
     private final SubscriberDtoMapper subscriberDtoMapper;
 
     @PostMapping
-    public SubscriberResponseDto create(@RequestBody SubscriberRequestDto subscriberRequestDto) {
+    public SubscriberResponseDto create(@Valid @RequestBody SubscriberRequestDto subscriberRequestDto) {
         SubscriberEntity subscriberEntity = subscriberEntityMapper.map(subscriberRequestDto);
 
         SubscriberEntity savedSubscriber = subscriberService.save(subscriberEntity);

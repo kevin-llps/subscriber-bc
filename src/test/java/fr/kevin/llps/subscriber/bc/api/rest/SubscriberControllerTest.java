@@ -4,35 +4,41 @@ import fr.kevin.llps.subscriber.bc.api.rest.dto.SubscriberRequestDto;
 import fr.kevin.llps.subscriber.bc.api.rest.dto.SubscriberResponseDto;
 import fr.kevin.llps.subscriber.bc.api.rest.mapper.SubscriberDtoMapper;
 import fr.kevin.llps.subscriber.bc.api.rest.mapper.SubscriberEntityMapper;
-import fr.kevin.llps.subscriber.bc.service.SubscriberService;
 import fr.kevin.llps.subscriber.bc.domain.SubscriberEntity;
+import fr.kevin.llps.subscriber.bc.service.SubscriberService;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static fr.kevin.llps.subscriber.bc.sample.SubscriberDtoSample.oneSubscriberRequestDto;
 import static fr.kevin.llps.subscriber.bc.sample.SubscriberDtoSample.oneSubscriberResponseDto;
 import static fr.kevin.llps.subscriber.bc.sample.SubscriberEntitySample.oneSubscriberEntity;
 import static fr.kevin.llps.subscriber.bc.utils.TestUtils.readResource;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(SubscriberController.class)
 class SubscriberControllerTest {
 
-    @Value("classpath:/json/subscriber-request.json")
+    @Value("classpath:/json/subscriber-request-ok.json")
     private Resource subscriberRequest;
 
-    @Value("classpath:/json/subscriber-response.json")
+    @Value("classpath:/json/subscriber-response-ok.json")
     private Resource subscriberResponse;
 
     @Autowired
@@ -70,6 +76,38 @@ class SubscriberControllerTest {
         verify(subscriberService).save(subscriberEntity);
         verify(subscriberDtoMapper).map(savedSubscriber);
         verifyNoMoreInteractions(subscriberEntityMapper, subscriberService, subscriberDtoMapper);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideErrorMessageByLocation")
+    void givenInvalidBodyRequest_shouldReturnExpectedMessage(String location, String errorMessage) throws Exception {
+        ResourceLoader resourceLoader = new DefaultResourceLoader();
+        Resource resource = resourceLoader.getResource(location);
+
+        mockMvc.perform(post("/subscribers")
+                        .content(readResource(resource))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message", is(errorMessage)));
+
+        verifyNoInteractions(subscriberEntityMapper, subscriberService, subscriberDtoMapper);
+    }
+
+    static Stream<Arguments> provideErrorMessageByLocation() {
+        return Stream.of(
+                Arguments.of("classpath:/json/subscriber-blank-firstname-request.json", "Field 'firstname' must be non-blank"),
+                Arguments.of("classpath:/json/subscriber-exceeded-chars-firstname-request.json", "Field 'firstname' must not exceed 100 characters"),
+                Arguments.of("classpath:/json/subscriber-blank-lastname-request.json", "Field 'lastname' must be non-blank"),
+                Arguments.of("classpath:/json/subscriber-exceeded-chars-lastname-request.json", "Field 'lastname' must not exceed 200 characters"),
+                Arguments.of("classpath:/json/subscriber-blank-email-request.json", "Field 'email' must be a valid email"),
+                Arguments.of("classpath:/json/subscriber-exceeded-chars-email-request.json", "Field 'email' must be a valid email"),
+                Arguments.of("classpath:/json/subscriber-invalid-email-request.json", "Field 'email' must be a valid email"),
+                Arguments.of("classpath:/json/subscriber-blank-phone-request.json", "Field 'phone' must have 10 digits"),
+                Arguments.of("classpath:/json/subscriber-exceeded-chars-phone-request.json", "Field 'phone' must have 10 digits"),
+                Arguments.of("classpath:/json/subscriber-less-than-required-chars-phone-request.json", "Field 'phone' must have 10 digits"),
+                Arguments.of("classpath:/json/subscriber-no-digits-phone-request.json", "Field 'phone' must have 10 digits")
+        );
     }
 
 }
