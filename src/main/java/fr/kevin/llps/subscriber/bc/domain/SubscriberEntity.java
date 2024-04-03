@@ -22,7 +22,7 @@ public class SubscriberEntity {
 
     @Id
     @GeneratedValue
-    @Column(name = "subscriber_id", nullable = false, columnDefinition = "BINARY(16)")
+    @Column(name = "subscriber_id", nullable = false, columnDefinition = "UUID")
     private UUID id;
 
     @Column(name = "firstname", nullable = false, columnDefinition = "VARCHAR(100)")
