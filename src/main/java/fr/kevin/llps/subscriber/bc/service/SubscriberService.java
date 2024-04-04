@@ -5,6 +5,9 @@ import fr.kevin.llps.subscriber.bc.repository.SubscriberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class SubscriberService {
@@ -17,6 +20,16 @@ public class SubscriberService {
 
     public boolean subscriberExists(SubscriberEntity subscriberEntity) {
         return subscriberRepository.findByEmailOrPhone(subscriberEntity.getEmail(), subscriberEntity.getPhone()).isPresent();
+    }
+
+    public Optional<SubscriberEntity> getSubscriberEntity(UUID id) {
+        return subscriberRepository.findById(id);
+    }
+
+    public void disable(SubscriberEntity subscriberEntity) {
+        subscriberEntity.setEnabled(false);
+
+        subscriberRepository.save(subscriberEntity);
     }
 
 }

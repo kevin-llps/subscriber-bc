@@ -13,7 +13,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.UUID;
 
+import static fr.kevin.llps.subscriber.bc.sample.SubscriberEntitySample.oneSubscriberEntity;
 import static fr.kevin.llps.subscriber.bc.utils.TestUtils.readResource;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -64,6 +66,30 @@ class SubscriberIntegrationTest extends PostgreSQLContainerTest {
                                 "jean.dupont@gmail.com",
                                 "0654323456",
                                 true));
+    }
+
+    @Test
+    void shouldDisable() throws Exception {
+        SubscriberEntity subscriberEntity = oneSubscriberEntity();
+
+        SubscriberEntity savedSubscriberEntity = subscriberRepository.save(subscriberEntity);
+        UUID id = savedSubscriberEntity.getId();
+
+        mockMvc.perform(post("/subscribers/{id}/disable", id))
+                .andExpect(status().isNoContent());
+
+        List<SubscriberEntity> subscriberEntities = subscriberRepository.findAll();
+
+        assertThat(subscriberEntities).isNotNull()
+                .hasSize(1)
+                .extracting("id", "firstname", "lastname", "email", "phone", "enabled")
+                .containsExactly(
+                        tuple(id,
+                                "jean",
+                                "dupont",
+                                "jean.dupont@gmail.com",
+                                "0654323456",
+                                false));
     }
 
 }

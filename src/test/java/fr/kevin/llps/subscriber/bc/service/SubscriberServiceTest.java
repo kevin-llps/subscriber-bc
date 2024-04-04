@@ -4,6 +4,8 @@ import fr.kevin.llps.subscriber.bc.domain.SubscriberEntity;
 import fr.kevin.llps.subscriber.bc.repository.SubscriberRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -23,6 +25,9 @@ class SubscriberServiceTest {
 
     @InjectMocks
     private SubscriberService subscriberService;
+
+    @Captor
+    private ArgumentCaptor<SubscriberEntity> subscriberEntityArgumentCaptor;
 
     @Test
     void shouldSave() {
@@ -51,6 +56,38 @@ class SubscriberServiceTest {
         assertThat(subscriberExists).isTrue();
 
         verify(subscriberRepository).findByEmailOrPhone(subscriberEntity.getEmail(), subscriberEntity.getPhone());
+        verifyNoMoreInteractions(subscriberRepository);
+    }
+
+    @Test
+    void shouldGetSubscriberEntity() {
+        SubscriberEntity expectedSubscriberEntity = oneSubscriberEntity();
+
+        UUID uuid = UUID.fromString("dde8bfa2-4922-11ec-81d3-0242ac130003");
+
+        when(subscriberRepository.findById(uuid)).thenReturn(Optional.of(expectedSubscriberEntity));
+
+        Optional<SubscriberEntity> subscriberEntity = subscriberService.getSubscriberEntity(uuid);
+
+        assertThat(subscriberEntity).contains(expectedSubscriberEntity);
+
+        verify(subscriberRepository).findById(uuid);
+        verifyNoMoreInteractions(subscriberRepository);
+    }
+
+    @Test
+    void shouldDisable() {
+        SubscriberEntity subscriberEntity = oneSubscriberEntity();
+
+        when(subscriberRepository.save(any())).thenReturn(subscriberEntity);
+
+        subscriberService.disable(subscriberEntity);
+
+        verify(subscriberRepository).save(subscriberEntityArgumentCaptor.capture());
+
+        SubscriberEntity captorValue = subscriberEntityArgumentCaptor.getValue();
+        assertThat(captorValue.isEnabled()).isFalse();
+
         verifyNoMoreInteractions(subscriberRepository);
     }
 

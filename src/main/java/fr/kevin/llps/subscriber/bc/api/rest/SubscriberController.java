@@ -6,13 +6,14 @@ import fr.kevin.llps.subscriber.bc.api.rest.mapper.SubscriberDtoMapper;
 import fr.kevin.llps.subscriber.bc.api.rest.mapper.SubscriberEntityMapper;
 import fr.kevin.llps.subscriber.bc.domain.SubscriberEntity;
 import fr.kevin.llps.subscriber.bc.exception.SubscriberAlreadyExistsException;
+import fr.kevin.llps.subscriber.bc.exception.SubscriberEntityNotFoundException;
 import fr.kevin.llps.subscriber.bc.service.SubscriberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/subscribers")
@@ -35,6 +36,17 @@ public class SubscriberController {
         SubscriberEntity savedSubscriber = subscriberService.save(subscriberEntity);
 
         return subscriberDtoMapper.map(savedSubscriber);
+    }
+
+    @PostMapping("/{id}/disable")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void disable(@PathVariable String id) {
+        UUID uuid = UUID.fromString(id);
+
+        SubscriberEntity subscriberEntity = subscriberService.getSubscriberEntity(uuid)
+                .orElseThrow(() -> new SubscriberEntityNotFoundException("Subscriber not found"));
+
+        subscriberService.disable(subscriberEntity);
     }
 
 }
