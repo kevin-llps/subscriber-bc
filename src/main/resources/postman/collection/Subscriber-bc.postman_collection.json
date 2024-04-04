@@ -73,6 +73,35 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Get by Subscriber id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/subscribers/{{id}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"subscribers",
+						"{{id}}"
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }
