@@ -15,4 +15,8 @@ public class SubscriberService {
         return subscriberRepository.save(subscriberEntity);
     }
 
+    public boolean subscriberExists(SubscriberEntity subscriberEntity) {
+        return subscriberRepository.findByEmailOrPhone(subscriberEntity.getEmail(), subscriberEntity.getPhone()).isPresent();
+    }
+
 }

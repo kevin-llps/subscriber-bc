@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static fr.kevin.llps.subscriber.bc.sample.SubscriberEntitySample.oneSubscriberEntity;
@@ -36,6 +37,20 @@ class SubscriberServiceTest {
         assertThat(savedSubscriber).isEqualTo(expectedSavedSubscriber);
 
         verify(subscriberRepository).save(subscriberEntity);
+        verifyNoMoreInteractions(subscriberRepository);
+    }
+
+    @Test
+    void givenSubscriber_whenCallSubscriberExists_shouldReturnTrue() {
+        SubscriberEntity subscriberEntity = oneSubscriberEntity();
+
+        when(subscriberRepository.findByEmailOrPhone(subscriberEntity.getEmail(), subscriberEntity.getPhone())).thenReturn(Optional.of(subscriberEntity));
+
+        boolean subscriberExists = subscriberService.subscriberExists(subscriberEntity);
+
+        assertThat(subscriberExists).isTrue();
+
+        verify(subscriberRepository).findByEmailOrPhone(subscriberEntity.getEmail(), subscriberEntity.getPhone());
         verifyNoMoreInteractions(subscriberRepository);
     }
 

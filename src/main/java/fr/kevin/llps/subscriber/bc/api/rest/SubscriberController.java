@@ -4,8 +4,9 @@ import fr.kevin.llps.subscriber.bc.api.rest.dto.SubscriberRequestDto;
 import fr.kevin.llps.subscriber.bc.api.rest.dto.SubscriberResponseDto;
 import fr.kevin.llps.subscriber.bc.api.rest.mapper.SubscriberDtoMapper;
 import fr.kevin.llps.subscriber.bc.api.rest.mapper.SubscriberEntityMapper;
-import fr.kevin.llps.subscriber.bc.service.SubscriberService;
 import fr.kevin.llps.subscriber.bc.domain.SubscriberEntity;
+import fr.kevin.llps.subscriber.bc.exception.SubscriberAlreadyExistsException;
+import fr.kevin.llps.subscriber.bc.service.SubscriberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,6 +26,11 @@ public class SubscriberController {
     @PostMapping
     public SubscriberResponseDto create(@Valid @RequestBody SubscriberRequestDto subscriberRequestDto) {
         SubscriberEntity subscriberEntity = subscriberEntityMapper.map(subscriberRequestDto);
+
+        if (subscriberService.subscriberExists(subscriberEntity)) {
+            String errorMessage = String.format("Subscriber already exist (email : %s, phone : %s)", subscriberEntity.getEmail(), subscriberEntity.getPhone());
+            throw new SubscriberAlreadyExistsException(errorMessage);
+        }
 
         SubscriberEntity savedSubscriber = subscriberService.save(subscriberEntity);
 

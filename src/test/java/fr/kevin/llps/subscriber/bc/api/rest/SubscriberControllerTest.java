@@ -62,6 +62,7 @@ class SubscriberControllerTest {
         savedSubscriber.setId(UUID.fromString("dde8bfa2-4922-11ec-81d3-0242ac130003"));
 
         when(subscriberEntityMapper.map(subscriberRequestDto)).thenReturn(subscriberEntity);
+        when(subscriberService.subscriberExists(subscriberEntity)).thenReturn(false);
         when(subscriberService.save(subscriberEntity)).thenReturn(savedSubscriber);
         when(subscriberDtoMapper.map(savedSubscriber)).thenReturn(subscriberResponseDto);
 
@@ -73,14 +74,35 @@ class SubscriberControllerTest {
                 .andExpect(content().json(readResource(subscriberResponse), true));
 
         verify(subscriberEntityMapper).map(subscriberRequestDto);
+        verify(subscriberService).subscriberExists(subscriberEntity);
         verify(subscriberService).save(subscriberEntity);
         verify(subscriberDtoMapper).map(savedSubscriber);
         verifyNoMoreInteractions(subscriberEntityMapper, subscriberService, subscriberDtoMapper);
     }
 
+    @Test
+    void givenAlreadyExistingSubscriber_whenCallCreate_shouldReturnBadRequestAsStatusCode() throws Exception {
+        SubscriberRequestDto subscriberRequestDto = oneSubscriberRequestDto();
+        SubscriberEntity subscriberEntity = oneSubscriberEntity();
+
+        when(subscriberEntityMapper.map(subscriberRequestDto)).thenReturn(subscriberEntity);
+        when(subscriberService.subscriberExists(subscriberEntity)).thenReturn(true);
+
+        mockMvc.perform(post("/subscribers")
+                        .content(readResource(subscriberRequest))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message", is("Subscriber already exist (email : jean.dupont@gmail.com, phone : 0654323456)")));
+
+        verify(subscriberEntityMapper).map(subscriberRequestDto);
+        verify(subscriberService).subscriberExists(subscriberEntity);
+        verifyNoMoreInteractions(subscriberEntityMapper, subscriberService);
+    }
+
     @ParameterizedTest
     @MethodSource("provideErrorMessageByLocation")
-    void givenInvalidBodyRequest_shouldReturnExpectedMessage(String location, String errorMessage) throws Exception {
+    void givenInvalidBodyRequest_whenCallCreate_shouldReturnExpectedMessage(String location, String errorMessage) throws Exception {
         ResourceLoader resourceLoader = new DefaultResourceLoader();
         Resource resource = resourceLoader.getResource(location);
 
