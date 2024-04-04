@@ -40,4 +40,20 @@ public class SubscriberEntity {
     @Column(name = "enabled", nullable = false, columnDefinition = "BOOLEAN")
     private boolean enabled;
 
+    public void update(SubscriberEntity newSubscriber) {
+        if (newSubscriber.getFirstname() != null) {
+            this.firstname = newSubscriber.getFirstname();
+        }
+        if (newSubscriber.getLastname() != null) {
+            this.lastname = newSubscriber.getLastname();
+        }
+        if (newSubscriber.getEmail() != null) {
+            this.email = newSubscriber.getEmail();
+        }
+        if (newSubscriber.getPhone() != null) {
+            this.phone = newSubscriber.getPhone();
+        }
+        this.enabled = newSubscriber.isEnabled();
+    }
+
 }

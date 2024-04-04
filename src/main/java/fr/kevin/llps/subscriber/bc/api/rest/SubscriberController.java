@@ -1,5 +1,6 @@
 package fr.kevin.llps.subscriber.bc.api.rest;
 
+import fr.kevin.llps.subscriber.bc.api.rest.dto.SubscriberPatchRequestDto;
 import fr.kevin.llps.subscriber.bc.api.rest.dto.SubscriberRequestDto;
 import fr.kevin.llps.subscriber.bc.api.rest.dto.SubscriberResponseDto;
 import fr.kevin.llps.subscriber.bc.api.rest.mapper.SubscriberDtoMapper;
@@ -15,18 +16,19 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+import static fr.kevin.llps.subscriber.bc.utils.Constants.SUBSCRIBER_NOT_FOUND_ERROR_MESSAGE;
+
 @RestController
 @RequestMapping("/subscribers")
 @RequiredArgsConstructor
 public class SubscriberController {
-
-    private static final String SUBSCRIBER_NOT_FOUND_ERROR_MESSAGE = "Subscriber not found";
 
     private final SubscriberService subscriberService;
     private final SubscriberEntityMapper subscriberEntityMapper;
     private final SubscriberDtoMapper subscriberDtoMapper;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public SubscriberResponseDto create(@Valid @RequestBody SubscriberRequestDto subscriberRequestDto) {
         SubscriberEntity subscriberEntity = subscriberEntityMapper.map(subscriberRequestDto);
 
@@ -59,6 +61,16 @@ public class SubscriberController {
                 .orElseThrow(() -> new SubscriberEntityNotFoundException(SUBSCRIBER_NOT_FOUND_ERROR_MESSAGE));
 
         subscriberService.disable(subscriberEntity);
+    }
+
+    @PatchMapping("/{id}")
+    public SubscriberResponseDto patch(@PathVariable String id, @Valid @RequestBody SubscriberPatchRequestDto subscriberPatchRequestDto) {
+        UUID uuid = UUID.fromString(id);
+        SubscriberEntity subscriberEntity = subscriberEntityMapper.map(subscriberPatchRequestDto);
+
+        SubscriberEntity updatedSubscriber = subscriberService.patch(uuid, subscriberEntity);
+
+        return subscriberDtoMapper.map(updatedSubscriber);
     }
 
 }

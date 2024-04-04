@@ -1,5 +1,6 @@
 package fr.kevin.llps.subscriber.bc.sample;
 
+import fr.kevin.llps.subscriber.bc.api.rest.dto.SubscriberPatchRequestDto;
 import fr.kevin.llps.subscriber.bc.api.rest.dto.SubscriberRequestDto;
 import fr.kevin.llps.subscriber.bc.api.rest.dto.SubscriberResponseDto;
 import lombok.AccessLevel;
@@ -23,6 +24,16 @@ public class SubscriberDtoSample {
 
     public static SubscriberRequestDto oneSubscriberRequestDto() {
         return SubscriberRequestDto.builder()
+                .firstname("jean")
+                .lastname("dupont")
+                .email("jean.dupont@gmail.com")
+                .phone("0654323456")
+                .enabled(true)
+                .build();
+    }
+
+    public static SubscriberPatchRequestDto oneSubscriberPatchRequestDto() {
+        return SubscriberPatchRequestDto.builder()
                 .firstname("jean")
                 .lastname("dupont")
                 .email("jean.dupont@gmail.com")

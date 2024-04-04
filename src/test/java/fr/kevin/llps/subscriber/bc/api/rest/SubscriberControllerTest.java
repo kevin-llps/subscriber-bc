@@ -1,5 +1,6 @@
 package fr.kevin.llps.subscriber.bc.api.rest;
 
+import fr.kevin.llps.subscriber.bc.api.rest.dto.SubscriberPatchRequestDto;
 import fr.kevin.llps.subscriber.bc.api.rest.dto.SubscriberRequestDto;
 import fr.kevin.llps.subscriber.bc.api.rest.dto.SubscriberResponseDto;
 import fr.kevin.llps.subscriber.bc.api.rest.mapper.SubscriberDtoMapper;
@@ -25,14 +26,12 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static fr.kevin.llps.subscriber.bc.sample.SubscriberDtoSample.oneSubscriberRequestDto;
-import static fr.kevin.llps.subscriber.bc.sample.SubscriberDtoSample.oneSubscriberResponseDto;
+import static fr.kevin.llps.subscriber.bc.sample.SubscriberDtoSample.*;
 import static fr.kevin.llps.subscriber.bc.sample.SubscriberEntitySample.oneSubscriberEntity;
 import static fr.kevin.llps.subscriber.bc.utils.TestUtils.readResource;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(SubscriberController.class)
@@ -75,7 +74,7 @@ class SubscriberControllerTest {
             mockMvc.perform(post("/subscribers")
                             .content(readResource(subscriberRequest))
                             .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk())
+                    .andExpect(status().isCreated())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                     .andExpect(content().json(readResource(subscriberResponse), true));
 
@@ -217,6 +216,38 @@ class SubscriberControllerTest {
 
             verify(subscriberService).getSubscriberEntity(uuid);
             verifyNoMoreInteractions(subscriberService);
+        }
+
+    }
+
+    @Nested
+    class Patch {
+
+        @Test
+        void shouldPatch() throws Exception {
+            String id = "dde8bfa2-4922-11ec-81d3-0242ac130003";
+            UUID uuid = UUID.fromString(id);
+
+            SubscriberPatchRequestDto subscriberPatchRequestDto = oneSubscriberPatchRequestDto();
+            SubscriberResponseDto subscriberResponseDto = oneSubscriberResponseDto();
+            SubscriberEntity subscriberEntity = oneSubscriberEntity();
+            SubscriberEntity savedSubscriber = oneSubscriberEntity();
+
+            when(subscriberEntityMapper.map(subscriberPatchRequestDto)).thenReturn(subscriberEntity);
+            when(subscriberService.patch(uuid, subscriberEntity)).thenReturn(savedSubscriber);
+            when(subscriberDtoMapper.map(savedSubscriber)).thenReturn(subscriberResponseDto);
+
+            mockMvc.perform(patch("/subscribers/{id}", id)
+                            .content(readResource(subscriberRequest))
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(content().json(readResource(subscriberResponse), true));
+
+            verify(subscriberEntityMapper).map(subscriberPatchRequestDto);
+            verify(subscriberService).patch(uuid, subscriberEntity);
+            verify(subscriberDtoMapper).map(savedSubscriber);
+            verifyNoMoreInteractions(subscriberEntityMapper, subscriberService, subscriberDtoMapper);
         }
 
     }
