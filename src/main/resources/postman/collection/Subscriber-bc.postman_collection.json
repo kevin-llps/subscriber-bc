@@ -8,6 +8,18 @@
 	"item": [
 		{
 			"name": "Create Subscriber",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var id = pm.response.json().id;",
+							"pm.environment.set('id', id);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -27,6 +39,36 @@
 					],
 					"path": [
 						"subscribers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Disable Subscriber",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/subscribers/{{id}}/disable",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"subscribers",
+						"{{id}}",
+						"disable"
 					]
 				}
 			},
