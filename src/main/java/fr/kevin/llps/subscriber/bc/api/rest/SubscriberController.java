@@ -20,6 +20,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class SubscriberController {
 
+    private static final String SUBSCRIBER_NOT_FOUND_ERROR_MESSAGE = "Subscriber not found";
+
     private final SubscriberService subscriberService;
     private final SubscriberEntityMapper subscriberEntityMapper;
     private final SubscriberDtoMapper subscriberDtoMapper;
@@ -38,13 +40,23 @@ public class SubscriberController {
         return subscriberDtoMapper.map(savedSubscriber);
     }
 
+    @GetMapping("/{id}")
+    public SubscriberResponseDto getById(@PathVariable String id) {
+        UUID uuid = UUID.fromString(id);
+
+        SubscriberEntity subscriberEntity = subscriberService.getSubscriberEntity(uuid)
+                .orElseThrow(() -> new SubscriberEntityNotFoundException(SUBSCRIBER_NOT_FOUND_ERROR_MESSAGE));
+
+        return subscriberDtoMapper.map(subscriberEntity);
+    }
+
     @PostMapping("/{id}/disable")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void disable(@PathVariable String id) {
         UUID uuid = UUID.fromString(id);
 
         SubscriberEntity subscriberEntity = subscriberService.getSubscriberEntity(uuid)
-                .orElseThrow(() -> new SubscriberEntityNotFoundException("Subscriber not found"));
+                .orElseThrow(() -> new SubscriberEntityNotFoundException(SUBSCRIBER_NOT_FOUND_ERROR_MESSAGE));
 
         subscriberService.disable(subscriberEntity);
     }

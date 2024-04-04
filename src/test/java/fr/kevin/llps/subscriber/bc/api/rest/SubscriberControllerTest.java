@@ -31,6 +31,7 @@ import static fr.kevin.llps.subscriber.bc.sample.SubscriberEntitySample.oneSubsc
 import static fr.kevin.llps.subscriber.bc.utils.TestUtils.readResource;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -140,6 +141,48 @@ class SubscriberControllerTest {
     }
 
     @Nested
+    class GetById {
+
+        @Test
+        void shouldGetById() throws Exception {
+            String id = "dde8bfa2-4922-11ec-81d3-0242ac130003";
+            UUID uuid = UUID.fromString(id);
+
+            SubscriberEntity subscriberEntity = oneSubscriberEntity();
+            SubscriberResponseDto subscriberResponseDto = oneSubscriberResponseDto();
+
+            when(subscriberService.getSubscriberEntity(uuid)).thenReturn(Optional.of(subscriberEntity));
+            when(subscriberDtoMapper.map(subscriberEntity)).thenReturn(subscriberResponseDto);
+
+            mockMvc.perform(get("/subscribers/{id}", id))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(content().json(readResource(subscriberResponse), true));
+
+            verify(subscriberService).getSubscriberEntity(uuid);
+            verify(subscriberDtoMapper).map(subscriberEntity);
+            verifyNoMoreInteractions(subscriberService, subscriberDtoMapper);
+        }
+
+        @Test
+        void givenNoExistingSubscriberId_shouldReturnNotFoundAsStatusCode() throws Exception {
+            String id = "dde8bfa2-4922-11ec-81d3-0242ac130003";
+            UUID uuid = UUID.fromString(id);
+
+            when(subscriberService.getSubscriberEntity(uuid)).thenReturn(Optional.empty());
+
+            mockMvc.perform(get("/subscribers/{id}", id))
+                    .andExpect(status().isNotFound())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.message", is("Subscriber not found")));
+
+            verify(subscriberService).getSubscriberEntity(uuid);
+            verifyNoMoreInteractions(subscriberService, subscriberDtoMapper);
+        }
+
+    }
+
+    @Nested
     class Disable {
 
         @Test
@@ -161,11 +204,9 @@ class SubscriberControllerTest {
         }
 
         @Test
-        void givenNoExistingSubscriber_shouldReturnNotFoundAsStatusCode() throws Exception {
+        void givenNoExistingSubscriberId_shouldReturnNotFoundAsStatusCode() throws Exception {
             String id = "dde8bfa2-4922-11ec-81d3-0242ac130003";
             UUID uuid = UUID.fromString(id);
-
-            SubscriberEntity subscriberEntity = oneSubscriberEntity();
 
             when(subscriberService.getSubscriberEntity(uuid)).thenReturn(Optional.empty());
 

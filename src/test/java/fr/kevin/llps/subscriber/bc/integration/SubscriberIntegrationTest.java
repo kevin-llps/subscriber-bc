@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -62,6 +63,37 @@ class SubscriberIntegrationTest extends PostgreSQLContainerTest {
                 .extracting("firstname", "lastname", "email", "phone", "enabled")
                 .containsExactly(
                         tuple("jean",
+                                "dupont",
+                                "jean.dupont@gmail.com",
+                                "0654323456",
+                                true));
+    }
+
+    @Test
+    void shouldGetById() throws Exception {
+        SubscriberEntity subscriberEntity = oneSubscriberEntity();
+
+        SubscriberEntity savedSubscriberEntity = subscriberRepository.save(subscriberEntity);
+        UUID id = savedSubscriberEntity.getId();
+
+        mockMvc.perform(get("/subscribers/{id}", id))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id", is(id.toString())))
+                .andExpect(jsonPath("$.firstname", is("jean")))
+                .andExpect(jsonPath("$.lastname", is("dupont")))
+                .andExpect(jsonPath("$.email", is("jean.dupont@gmail.com")))
+                .andExpect(jsonPath("$.phone", is("0654323456")))
+                .andExpect(jsonPath("$.enabled", is(true)));
+
+        List<SubscriberEntity> subscriberEntities = subscriberRepository.findAll();
+
+        assertThat(subscriberEntities).isNotNull()
+                .hasSize(1)
+                .extracting("id", "firstname", "lastname", "email", "phone", "enabled")
+                .containsExactly(
+                        tuple(id,
+                                "jean",
                                 "dupont",
                                 "jean.dupont@gmail.com",
                                 "0654323456",
