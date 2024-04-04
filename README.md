@@ -40,12 +40,14 @@ au sein de la base PostgreSQL.
 |--------------------------------|-------------------------------------------------------------------------------------------------|
 | POST /subscribers              | Création d'un abonné                                                                            |
 |                                | - Le request body est soumis à des conditions de validation en fonction du format attendu.      |
-|                                | - Si l'email ou le numéro de téléphone (phone) sont déjà répertoriés, un code 400 est retourné. |
+|                                | - Si l'email ou le numéro de téléphone (phone) sont déjà répertoriés, un code 409 est retourné. |
 | GET /subscribers/{id}          | Récupérer un abonné à partir de son id                                                          |
 |                                | - Lorsque l'id de l'abonné n'est pas répertorié, un 404 est retourné.                           |
 | POST /subscribers/{id}/disable | Résilier un abonné (sans le supprimer physiquement)                                             |
 |                                | - Lorsque l'id de l'abonné n'est pas répertorié, un 404 est retourné.                           |
 | PATCH /subscribers/{id}        | Mettre à jour les données d'un abonné                                                           |
+|                                | - Le request body est soumis à des conditions de validation en fonction du format attendu.      |
+|                                | - Si l'email ou le numéro de téléphone (phone) sont déjà répertoriés, un code 409 est retourné. |
 
 ## Choix d'implémentation
 

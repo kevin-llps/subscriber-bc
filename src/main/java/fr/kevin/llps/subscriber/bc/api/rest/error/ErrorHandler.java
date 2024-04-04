@@ -19,8 +19,14 @@ public class ErrorHandler {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({SubscriberAlreadyExistsException.class, IllegalArgumentException.class})
-    public ErrorDto handleCustomRuntimeException(RuntimeException runtimeException) {
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ErrorDto handleIllegalArgumentException(RuntimeException runtimeException) {
+        return new ErrorDto(runtimeException.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler({SubscriberAlreadyExistsException.class})
+    public ErrorDto handleSubscriberAlreadyExistsException(RuntimeException runtimeException) {
         return new ErrorDto(runtimeException.getMessage());
     }
 

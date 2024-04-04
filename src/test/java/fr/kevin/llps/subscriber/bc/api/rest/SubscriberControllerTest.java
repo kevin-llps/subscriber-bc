@@ -96,7 +96,7 @@ class SubscriberControllerTest {
             mockMvc.perform(post("/subscribers")
                             .content(readResource(subscriberRequest))
                             .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isBadRequest())
+                    .andExpect(status().isConflict())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.message", is("Subscriber already exist (email : jean.dupont@gmail.com, phone : 0654323456)")));
 
