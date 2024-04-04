@@ -16,10 +16,10 @@
                 <constraints nullable="false"/>
             </column>
             <column name="email" type="VARCHAR(200)">
-                <constraints nullable="false"/>
+                <constraints nullable="false" unique="true"/>
             </column>
             <column name="phone" type="CHAR(10)">
-                <constraints nullable="false"/>
+                <constraints nullable="false" unique="true"/>
             </column>
             <column name="enabled" type="BOOLEAN">
                 <constraints nullable="false"/>
