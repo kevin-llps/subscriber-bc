@@ -250,6 +250,36 @@ class SubscriberControllerTest {
             verifyNoMoreInteractions(subscriberEntityMapper, subscriberService, subscriberDtoMapper);
         }
 
+        @ParameterizedTest
+        @MethodSource("provideErrorMessageByLocation")
+        void givenInvalidBodyRequest_whenCallPatch_shouldReturnExpectedMessage(String location, String errorMessage) throws Exception {
+            String id = "dde8bfa2-4922-11ec-81d3-0242ac130003";
+
+            ResourceLoader resourceLoader = new DefaultResourceLoader();
+            Resource resource = resourceLoader.getResource(location);
+
+            mockMvc.perform(patch("/subscribers/{id}", id)
+                            .content(readResource(resource))
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.message", is(errorMessage)));
+
+            verifyNoInteractions(subscriberEntityMapper, subscriberService, subscriberDtoMapper);
+        }
+
+        static Stream<Arguments> provideErrorMessageByLocation() {
+            return Stream.of(
+                    Arguments.of("classpath:/json/subscriber-exceeded-chars-firstname-request.json", "Field 'firstname' must not exceed 100 characters"),
+                    Arguments.of("classpath:/json/subscriber-exceeded-chars-lastname-request.json", "Field 'lastname' must not exceed 200 characters"),
+                    Arguments.of("classpath:/json/subscriber-exceeded-chars-email-request.json", "Field 'email' must be a valid email"),
+                    Arguments.of("classpath:/json/subscriber-invalid-email-request.json", "Field 'email' must be a valid email"),
+                    Arguments.of("classpath:/json/subscriber-exceeded-chars-phone-request.json", "Field 'phone' must have 10 digits"),
+                    Arguments.of("classpath:/json/subscriber-less-than-required-chars-phone-request.json", "Field 'phone' must have 10 digits"),
+                    Arguments.of("classpath:/json/subscriber-no-digits-phone-request.json", "Field 'phone' must have 10 digits")
+            );
+        }
+
     }
 
 }
