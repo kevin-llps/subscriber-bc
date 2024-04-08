@@ -10,15 +10,15 @@ Il s'agit également d'une application stateless, les données seront stockées 
 
 ## Flux entrant(s)
 
-| Application              | Protocol | Description                                |
-|--------------------------|----------|--------------------------------------------|
-| Postman (tests en local) | HTTP     | Appel de l'API REST de gestion des abonnés |
+| Application              | Protocole | Port | Description                                |
+|--------------------------|-----------|------|--------------------------------------------|
+| Postman (tests en local) | HTTP      | 80   | Appel de l'API REST de gestion des abonnés |
 
 ## Flux sortant(s)
 
-| Application | Protocol | Description                                      |
-|-------------|----------|--------------------------------------------------|
-| PostgreSQL  | HTTP     | Création, mise à jour et résiliation des abonnés |
+| Application | Protocole | Port | Description                                      |
+|-------------|-----------|------|--------------------------------------------------|
+| PostgreSQL  | TCP       | 5432 | Création, mise à jour et résiliation des abonnés |
 
 ## Base de données
 
